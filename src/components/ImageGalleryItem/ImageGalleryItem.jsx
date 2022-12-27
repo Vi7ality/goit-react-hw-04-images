@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import css from './ImageGalleryItem.module.css'
 
 
 
@@ -10,10 +11,10 @@ export class ImageGalleryItem extends Component {
   
 
   render() {
-    const {src, url, id} = this.props;
+    const {src, alt} = this.props;
     return (
-      <li class="gallery-item" key={id}>
-        <img src={src} url={url} alt="" />
+      <li className={css.ImageGalleryItem}>
+        <img src={src} alt={alt} className={css.ImageGalleryItemImage} />
       </li>
     );
   }

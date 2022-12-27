@@ -1,9 +1,10 @@
-import axios from 'axios';
-import { Loader } from 'components/Loader/Loader';
+import MyLoader from 'components/Loader/Loader';
 import { Component } from 'react';
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
-
-const API_KEY = '30692971-b147f9a702170160ab831dd90';
+import css from './ImageGallery.module.css';
+import { toast } from 'react-toastify';
+import { getImages } from 'service/image-service';
+import { LoadMoreBtn } from 'components/LoadMoreBtn/LoadMoreBtn';
 
 export class ImageGallery extends Component {
   static defaultProps = {};
@@ -11,7 +12,9 @@ export class ImageGallery extends Component {
   static propTypes = {};
 
   state = {
-    images: null,
+    page: 1,
+    totalResults: null,
+    images: [],
     status: 'idle',
   };
 
@@ -19,42 +22,73 @@ export class ImageGallery extends Component {
     const prevQuery = prevProps.searchQuery;
     const newQuery = this.props.searchQuery;
 
-      if (prevQuery !== newQuery) {
-        this.setState({ status: 'pending' });
+    const { page } = this.state;
 
-        try {
-          const response = await axios
-            .get(
-              `https://pixabay.com/api/?q=${newQuery}&page=1&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`);
-          this.setState({
-            images: response.data.hits,
-            status: 'resolved',
-          });
-        } catch (error) {
-          this.setState({ error: 'Oops, something went wrong. Check your internet connection or try to reload page.', status: 'rejected' });
-            console.log(error);
-        }
-
+    if (prevQuery !== newQuery || prevState.page !== this.state.page) {
+      this.setState({ status: 'pending' });
+      this.getPhotos(newQuery, page);
     }
   }
 
+  getPhotos = async (query, page) => {
+    try {
+      const {
+        data: { hits, total },
+      } = await getImages(query, page);
+      if (total === 0) {
+        this.setState({
+          error: `There is no image with "${query}" name`,
+          status: 'rejected',
+        });
+        return;
+      }
+      this.setState(prevState => ({
+        images: [...prevState.images, ...hits],
+        status: 'resolved',
+        totalResults: total,
+      }));
+    } catch (error) {
+      this.setState({
+        error:
+          'Oops, something went wrong. Check your internet connection or try to reload page.',
+        status: 'rejected',
+      });
+      console.log(error);
+    }
+  };
+
+  onLoadMore = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
+  };
   render() {
-    const { images, status, error } = this.state;
+    const { status, error, page, totalResults } = this.state;
 
     if (status === 'pending') {
-      return <Loader></Loader>;
+      return <MyLoader></MyLoader>;
     }
-    if(status === 'rejected') {
-              return <h1>{error}</h1>
+    if (status === 'rejected') {
+      return toast.error(error);
     }
     if (status === 'resolved') {
-      return <div>{images && <ul className="gallery">{this.state.images.map(image => {
-        const { previewURL, pageURL, id } = image;
-        return <ImageGalleryItem src={previewURL} url={pageURL} id={id}></ImageGalleryItem>
-      })}</ul>}</div>;
-      }
-          
+      return (
+        <div>
+          <ul className={css.ImageGallery}>
+            {this.state.images.map(image => {
+              const { webformatURL, id, tags } = image;
+              return (
+                <ImageGalleryItem
+                  src={webformatURL}
+                  key={id}
+                  alt={tags}
+                ></ImageGalleryItem>
+              );
+            })}
+          </ul>
+          {page < totalResults && <LoadMoreBtn onClick={this.onLoadMore}></LoadMoreBtn>}
+        </div>
+      );
     }
-    
-
+  }
 }

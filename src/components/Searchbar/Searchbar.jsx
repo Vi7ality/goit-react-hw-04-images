@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import css from './Searchbar.module.css'
 import { toast } from 'react-toastify';
 
 
@@ -20,7 +21,7 @@ export class Searchbar extends Component {
   handleSubmit = (event) => {
     event.preventDefault();
     if (this.state.searchQuery === '') {
-      alert("Search field is empty")
+      toast.warn("Search field is empty")
       return
     }
     this.props.handlerSubmit(this.state.searchQuery);
@@ -32,23 +33,23 @@ export class Searchbar extends Component {
 
   render() {
     return (
-      <header className="searchbar">
-        <form className="form" onSubmit={this.handleSubmit}>
+      <header className={css.Searchbar}>
+        <form className={css.SearchForm} onSubmit={this.handleSubmit}>
           <button
             type="submit"
-            className="button"
+            className={css.SearchFormButton}
           >
-            <span className="button-label">Search</span>
+            <span className={css.SearchFormButtonLabel}>Search</span>
           </button>
 
           <input
-            className="input"
             type="text"
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
             value={this.state.searchQuery}
             onChange={this.handleQueryChange}
+            className={css.SearchFormInput}
           />
         </form>
       </header>

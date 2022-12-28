@@ -62,6 +62,7 @@ export class ImageGallery extends Component {
       page: prevState.page + 1,
     }));
   };
+
   render() {
     const { status, error, page, totalResults } = this.state;
 
@@ -76,12 +77,13 @@ export class ImageGallery extends Component {
         <div>
           <ul className={css.ImageGallery}>
             {this.state.images.map(image => {
-              const { webformatURL, id, tags } = image;
+              const { webformatURL, id, tags, largeImageURL } = image;
               return (
-                <ImageGalleryItem
+                <ImageGalleryItem onClick={this.props.onImageClick}
                   src={webformatURL}
                   key={id}
                   alt={tags}
+                  url={largeImageURL}
                 ></ImageGalleryItem>
               );
             })}

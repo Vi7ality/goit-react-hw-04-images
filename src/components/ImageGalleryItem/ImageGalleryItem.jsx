@@ -11,10 +11,10 @@ export class ImageGalleryItem extends Component {
   
 
   render() {
-    const {src, alt} = this.props;
+    const {src, alt, url} = this.props;
     return (
-      <li className={css.ImageGalleryItem}>
-        <img src={src} alt={alt} className={css.ImageGalleryItemImage} />
+      <li className={css.ImageGalleryItem} onClick={this.props.onClick}>
+        <img src={src} alt={alt} srcSet={url} className={css.ImageGalleryItemImage} />
       </li>
     );
   }

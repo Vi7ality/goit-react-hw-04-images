@@ -3,8 +3,8 @@ import { Searchbar } from '../Searchbar/Searchbar';
 import { ImageGallery } from '../ImageGallery/ImageGallery';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import css from './App.module.css'
-
+import css from './App.module.css';
+import { Modal } from 'components/Modal/Modal';
 
 export default class App extends Component {
   static defaultProps = {};
@@ -14,15 +14,29 @@ export default class App extends Component {
   state = {
     searchQuery: null,
     response: null,
+    showModal: false,
   };
 
   handlerQuerySubmit = query => {
     this.setState({
       searchQuery: query,
     });
-
   };
+
+  toggleModal = () => {
+    this.setState(({showModal} ) => ({
+      showModal: !showModal,
+    }));
+  };
+
+  onImageClick = (event) => {
+    this.toggleModal();
+    this.setState({
+      srcModalImage: event.target.srcset,
+    })
+  }
   render() {
+    const { searchQuery, showModal, srcModalImage } = this.state;
     return (
       <div
         // style={{
@@ -37,8 +51,18 @@ export default class App extends Component {
       >
         <Searchbar handlerSubmit={this.handlerQuerySubmit}></Searchbar>
         <ImageGallery
-          searchQuery={this.state.searchQuery}
+          searchQuery={searchQuery}
+          toggleModal={this.toggleModal}
+          onImageClick={this.onImageClick}
         ></ImageGallery>
+        {showModal && (
+          <Modal onClose={this.toggleModal}>
+            <img
+              src={srcModalImage}
+              alt=""
+            />
+          </Modal>
+        )}
         <ToastContainer />
       </div>
     );

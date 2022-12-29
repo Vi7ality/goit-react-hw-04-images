@@ -20,6 +20,7 @@ export class Searchbar extends Component {
 
   handleSubmit = (event) => {
     event.preventDefault();
+    event.target.reset();
     if (this.state.searchQuery === '') {
       toast.warn("Search field is empty")
       return

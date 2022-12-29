@@ -24,7 +24,12 @@ export class ImageGallery extends Component {
 
     const { page } = this.state;
 
-    if (prevQuery !== newQuery || prevState.page !== this.state.page) {
+    if (prevQuery !== newQuery) {
+      this.setState({ status: 'pending', images: [], page: 1 });
+      this.getPhotos(newQuery, page);
+    }
+
+      if (prevState.page !== this.state.page) {
       this.setState({ status: 'pending' });
       this.getPhotos(newQuery, page);
     }
@@ -53,7 +58,7 @@ export class ImageGallery extends Component {
           'Oops, something went wrong. Check your internet connection or try to reload page.',
         status: 'rejected',
       });
-      console.log(error);
+      
     }
   };
 
@@ -74,7 +79,7 @@ export class ImageGallery extends Component {
     }
     if (status === 'resolved') {
       return (
-        <div>
+        <div className={css.ImageGalleryContainer}>
           <ul className={css.ImageGallery}>
             {this.state.images.map(image => {
               const { webformatURL, id, tags, largeImageURL } = image;
@@ -83,12 +88,12 @@ export class ImageGallery extends Component {
                   src={webformatURL}
                   key={id}
                   alt={tags}
-                  url={largeImageURL}
+                  url={largeImageURL }
                 ></ImageGalleryItem>
               );
             })}
           </ul>
-          {page < totalResults && <LoadMoreBtn onClick={this.onLoadMore}></LoadMoreBtn>}
+          {page < totalResults / 15 && <LoadMoreBtn onClick={this.onLoadMore}></LoadMoreBtn>}
         </div>
       );
     }

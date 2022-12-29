@@ -1,3 +1,7 @@
+.ImageGalleryContainer {
+    text-align: center;
+}
+
 .ImageGallery {
     display: grid;
     max-width: calc(100vw - 48px);
@@ -10,3 +14,4 @@
     margin-left: auto;
     margin-right: auto;
 }
+

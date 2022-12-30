@@ -1,87 +1,38 @@
-import MyLoader from 'components/Loader/Loader';
+
 import { Component } from 'react';
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import css from './ImageGallery.module.css';
-import { toast } from 'react-toastify';
-import { getImages } from 'service/image-service';
 import { LoadMoreBtn } from 'components/LoadMoreBtn/LoadMoreBtn';
+import PropTypes from 'prop-types';
+import ImageGrid from 'components/Loader/Loader';
 
 export class ImageGallery extends Component {
   static defaultProps = {};
 
-  static propTypes = {};
-
-  state = {
-    page: 1,
-    totalResults: null,
-    images: [],
-    status: 'idle',
+  static propTypes = {
+    searchQuery: PropTypes.string,
+    images: PropTypes.array.isRequired,
+    page: PropTypes.number.isRequired,
+    status: PropTypes.string.isRequired,
+    totalResults: PropTypes.number,
+    toggleModal: PropTypes.func.isRequired,
+    onImageClick: PropTypes.func.isRequired,
+    onLoadMore: PropTypes.func.isRequired,
   };
 
-  async componentDidUpdate(prevProps, prevState) {
-    const prevQuery = prevProps.searchQuery;
-    const newQuery = this.props.searchQuery;
-
-    const { page } = this.state;
-
-    if (prevQuery !== newQuery) {
-      this.setState({ status: 'pending', images: [], page: 1 });
-      this.getPhotos(newQuery, page);
-    }
-
-      if (prevState.page !== this.state.page) {
-      this.setState({ status: 'pending' });
-      this.getPhotos(newQuery, page);
-    }
-  }
-
-  getPhotos = async (query, page) => {
-    try {
-      const {
-        data: { hits, total },
-      } = await getImages(query, page);
-      if (total === 0) {
-        this.setState({
-          error: `There is no image with "${query}" name`,
-          status: 'rejected',
-        });
-        return;
-      }
-      this.setState(prevState => ({
-        images: [...prevState.images, ...hits],
-        status: 'resolved',
-        totalResults: total,
-      }));
-    } catch (error) {
-      this.setState({
-        error:
-          'Oops, something went wrong. Check your internet connection or try to reload page.',
-        status: 'rejected',
-      });
-      
-    }
-  };
-
-  onLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
-  };
 
   render() {
-    const { status, error, page, totalResults } = this.state;
+    const { status, page, totalResults, images, onLoadMore } = this.props;
 
     if (status === 'pending') {
-      return <MyLoader></MyLoader>;
+      return <ImageGrid></ImageGrid>;
     }
-    if (status === 'rejected') {
-      return toast.error(error);
-    }
+
     if (status === 'resolved') {
       return (
         <div className={css.ImageGalleryContainer}>
           <ul className={css.ImageGallery}>
-            {this.state.images.map(image => {
+            {images.map(image => {
               const { webformatURL, id, tags, largeImageURL } = image;
               return (
                 <ImageGalleryItem onClick={this.props.onImageClick}
@@ -93,7 +44,7 @@ export class ImageGallery extends Component {
               );
             })}
           </ul>
-          {page < totalResults / 15 && <LoadMoreBtn onClick={this.onLoadMore}></LoadMoreBtn>}
+          {page < totalResults / 15 && <LoadMoreBtn onClick={onLoadMore}></LoadMoreBtn>}
         </div>
       );
     }

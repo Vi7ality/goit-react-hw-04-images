@@ -1,13 +1,16 @@
 import { Component } from 'react';
 import css from './ImageGalleryItem.module.css'
+import PropTypes from 'prop-types';
 
 
 
 export class ImageGalleryItem extends Component {
 
-    static defaultProps = {};
-
-  static propTypes = {};
+  static propTypes = {
+    src: PropTypes.string.isRequired,
+    alt: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+  };
   
 
   render() {

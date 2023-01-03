@@ -18,17 +18,6 @@ export default function App() {
   const [error, setError] = useState('');
   const [srcModalImage, setSrcModalImage] = useState('');
 
-  // state = {
-  //   searchQuery: null,
-  //   response: null,
-  //   showModal: false,
-  //   page: 1,
-  //   totalResults: null,
-  //   images: [],
-  //   status: 'idle',
-  //   error: '',
-  // };
-
   const resetState = () => {
     setPage(1);
     setImages([]);
@@ -38,14 +27,6 @@ export default function App() {
   };
 
   const handlerQuerySubmit = query => {
-    // this.setState({
-    //   searchQuery: query,
-    //   page: 1,
-    //   images: [],
-    //   status: 'idle',
-    //   totalResults: null,
-    //   error: '',
-    // });
     setSearchQuery(query);
     resetState();
   };

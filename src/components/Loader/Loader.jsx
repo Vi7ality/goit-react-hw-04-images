@@ -38,4 +38,3 @@ ImageGrid.metadata = {
 
 export default ImageGrid
 
-// export default MyLoader

@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { Searchbar } from '../Searchbar/Searchbar';
 import { ImageGallery } from '../ImageGallery/ImageGallery';
 import { ToastContainer } from 'react-toastify';
@@ -8,123 +8,124 @@ import { Modal } from 'components/Modal/Modal';
 import { getImages } from 'service/image-service';
 import { toast } from 'react-toastify';
 
-export default class App extends Component {
-  
+export default function App() {
+  const [searchQuery, setSearchQuery] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(null);
+  const [images, setImages] = useState([]);
+  const [status, setStatus] = useState('idle');
+  const [error, setError] = useState('');
+  const [srcModalImage, setSrcModalImage] = useState('');
 
-  static propTypes = {};
+  // state = {
+  //   searchQuery: null,
+  //   response: null,
+  //   showModal: false,
+  //   page: 1,
+  //   totalResults: null,
+  //   images: [],
+  //   status: 'idle',
+  //   error: '',
+  // };
 
-  state = {
-    searchQuery: null,
-    response: null,
-    showModal: false,
-    page: 1,
-    totalResults: null,
-    images: [],
-    status: 'idle',
-    error: '',
+  const resetState = () => {
+    setPage(1);
+    setImages([]);
+    setStatus('idle');
+    setTotalResults(null);
+    setError('');
   };
 
-  handlerQuerySubmit = query => {
-    this.setState({
-      searchQuery: query,
-      page: 1,
-      images: [],
-      status: 'idle',
-      totalResults: null,
-      error: '',
-    });
+  const handlerQuerySubmit = query => {
+    // this.setState({
+    //   searchQuery: query,
+    //   page: 1,
+    //   images: [],
+    //   status: 'idle',
+    //   totalResults: null,
+    //   error: '',
+    // });
+    setSearchQuery(query);
+    resetState();
   };
 
-  async componentDidUpdate(prevProps, prevState) {
-    const prevQuery = prevState.searchQuery;
-    const newQuery = this.state.searchQuery;
-
-    const { page } = this.state;
-
-    if (prevQuery !== newQuery || prevState.page !== page) {
-      this.setState({ status: 'pending' });
-      this.getPhotos(newQuery, page);
+  useEffect(() => {
+    if (!searchQuery) {
+      return;
     }
-
-  }
-
-  getPhotos = async (query, page) => {
-    try {
-      const {
-        data: { hits, total },
-      } = await getImages(query, page);
-      if (total === 0) {
-        this.setState({
-          error: `There is no image with "${query}" name`,
-          status: 'rejected',
-        });
-        toast.error(`There is no image with "${query}" name`);
-        return;
-      }
-      this.setState(prevState => ({
-        images: [...prevState.images, ...hits],
-        status: 'resolved',
-        totalResults: total,
-      }));
-    } catch (error) {
-      this.setState({
-        error:
-          'Oops, something went wrong. Check your internet connection or try to reload page.',
-        status: 'rejected',
+    setStatus('pending');
+    getImages(searchQuery, page)
+      .then(({ data: { total, hits } }) => {
+        if (total === 0) {
+          setError(`There is no image with ${searchQuery} name`);
+          toast.error(`There is no image with "${searchQuery}" name`);
+          setStatus('rejected');
+          return;
+        }
+        setImages(prevState => [...prevState, ...hits]);
+        setStatus('resolved');
+        setTotalResults(total);
+      })
+      .catch(error => {
+        setError(error);
+        toast.error(
+          'Oops, something went wrong. Check your internet connection or try to reload page.'
+        );
+        setStatus('rejected');
       });
-    }
+
+    // try {
+    //   const {
+    //     data: { hits, total }
+    //   } = getImages(searchQuery, page);
+    //   if (total === 0) {
+    //     setError(`There is no image with ${searchQuery} name`);
+    //     toast.error(`There is no image with "${searchQuery}" name`);
+    //     return;
+    //   }
+    //   setImages(prevState => [...prevState, ...hits]);
+    //   setStatus('resolved');
+    //   setTotalResults(total);
+    // } catch (error) {
+    //   setError(
+    //     error
+    //   );
+    //   toast.error('Oops, something went wrong. Check your internet connection or try to reload page.')
+    //   setStatus('rejected');
+    // }
+  }, [searchQuery, page]);
+
+  const onLoadMore = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  onLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const toggleModal = () => {
+    setShowModal(prevState => !prevState);
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
+  const onImageClick = event => {
+    toggleModal();
+    setSrcModalImage(event.target.srcset);
   };
 
-  onImageClick = event => {
-    this.toggleModal();
-    this.setState({
-      srcModalImage: event.target.srcset,
-    });
-  };
-  render() {
-    const {
-      searchQuery,
-      page,
-      totalResults,
-      images,
-      status,
-      srcModalImage,
-      showModal,
-    } = this.state;
-    return (
-      <div
-        className={css.App}
-      >
-        <Searchbar handlerSubmit={this.handlerQuerySubmit}></Searchbar>
-        <ImageGallery
-          searchQuery={searchQuery}
-          images={images}
-          page={page}
-          status={status}
-          totalResults={totalResults}
-          toggleModal={this.toggleModal}
-          onImageClick={this.onImageClick}
-          onLoadMore={this.onLoadMore}
-        ></ImageGallery>
-        {showModal && (
-          <Modal onClose={this.toggleModal}>
-            <img src={srcModalImage} alt="" />
-          </Modal>
-        )}
-        <ToastContainer />
-      </div>
-    );
-  }
+  return (
+    <div className={css.App}>
+      <Searchbar handlerSubmit={handlerQuerySubmit}></Searchbar>
+      <ImageGallery
+        images={images}
+        page={page}
+        status={status}
+        totalResults={totalResults}
+        onImageClick={onImageClick}
+        onLoadMore={onLoadMore}
+      ></ImageGallery>
+      {showModal && (
+        <Modal onClose={toggleModal}>
+          <img src={srcModalImage} alt="" />
+        </Modal>
+      )}
+      <ToastContainer />
+    </div>
+  );
 }

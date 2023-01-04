@@ -16,7 +16,6 @@ export default function App() {
   const [totalResults, setTotalResults] = useState(null);
   const [images, setImages] = useState([]);
   const [status, setStatus] = useState('idle');
-  const [error, setError] = useState('');
   const [srcModalImage, setSrcModalImage] = useState('');
   const [showSpinner, setShowSpinner] = useState(false);
 
@@ -26,7 +25,6 @@ export default function App() {
     setImages([]);
     setStatus('idle');
     setTotalResults(null);
-    setError('');
   };
 
   const handlerQuerySubmit = query => {
@@ -42,7 +40,6 @@ export default function App() {
     getImages(searchQuery, page)
       .then(({ data: { total, hits } }) => {
         if (total === 0) {
-          setError(`There is no image with ${searchQuery} name`);
           toast.error(`There is no image with "${searchQuery}" name`);
           setStatus('rejected');
           return;
@@ -52,7 +49,6 @@ export default function App() {
         setTotalResults(total);
       })
       .catch(error => {
-        setError(error);
         toast.error(
           'Oops, something went wrong. Check your internet connection or try to reload page.'
         );

@@ -4,6 +4,7 @@ import { LoadMoreBtn } from 'components/LoadMoreBtn/LoadMoreBtn';
 import PropTypes from 'prop-types';
 import ImageGrid from 'components/Loader/Loader';
 import { Spinner } from 'components/Spinner/Spinner';
+import { useRef, useEffect } from 'react';
 
 
 export function ImageGallery ({
@@ -16,8 +17,20 @@ export function ImageGallery ({
   showSpinner,
 }) {
 
+  const galleryRef = useRef();
+  
+  useEffect(() => {
+    if (galleryRef.current) {
+      console.log(galleryRef.current)
+          const { height: cardHeight } = galleryRef.current.getBoundingClientRect();
 
+window.scrollBy({
+  top: cardHeight * 2,
+  behavior: "smooth",
+});
+    }
 
+  })
 
 
   if (status === 'pending' && page === 1) {
@@ -27,7 +40,7 @@ export function ImageGallery ({
   if (status === 'resolved') {
     return (
       <div className={css.ImageGalleryContainer}>
-        <ul className={css.ImageGallery}>
+        <ul className={css.ImageGallery} ref={galleryRef}>
           {images.map(image => {
             const { webformatURL, id, tags, largeImageURL } = image;
             return (

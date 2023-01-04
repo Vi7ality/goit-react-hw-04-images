@@ -3,16 +3,24 @@ import css from './ImageGallery.module.css';
 import { LoadMoreBtn } from 'components/LoadMoreBtn/LoadMoreBtn';
 import PropTypes from 'prop-types';
 import ImageGrid from 'components/Loader/Loader';
+import { Spinner } from 'components/Spinner/Spinner';
 
-export function ImageGallery({
+
+export function ImageGallery ({
   images,
   page,
   status,
   totalResults,
   onImageClick,
   onLoadMore,
+  showSpinner,
 }) {
-  if (status === 'pending') {
+
+
+
+
+
+  if (status === 'pending' && page === 1) {
     return <ImageGrid></ImageGrid>;
   }
 
@@ -33,6 +41,13 @@ export function ImageGallery({
             );
           })}
         </ul>
+
+        {showSpinner && (
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Spinner></Spinner>
+          </div>
+        )}
+
         {page < totalResults / 15 && (
           <LoadMoreBtn onClick={onLoadMore}></LoadMoreBtn>
         )}

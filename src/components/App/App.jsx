@@ -8,6 +8,7 @@ import { Modal } from 'components/Modal/Modal';
 import { getImages } from 'service/image-service';
 import { toast } from 'react-toastify';
 
+
 export default function App() {
   const [searchQuery, setSearchQuery] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -17,6 +18,8 @@ export default function App() {
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
   const [srcModalImage, setSrcModalImage] = useState('');
+  const [showSpinner, setShowSpinner] = useState(false);
+
 
   const resetState = () => {
     setPage(1);
@@ -54,7 +57,8 @@ export default function App() {
           'Oops, something went wrong. Check your internet connection or try to reload page.'
         );
         setStatus('rejected');
-      });
+      })
+      .finally(setShowSpinner(false));
 
     // try {
     //   const {
@@ -75,9 +79,10 @@ export default function App() {
     //   toast.error('Oops, something went wrong. Check your internet connection or try to reload page.')
     //   setStatus('rejected');
     // }
-  }, [searchQuery, page]);
+  }, [page, searchQuery]);
 
   const onLoadMore = () => {
+    setShowSpinner(true);
     setPage(prevState => prevState + 1);
   };
 
@@ -100,6 +105,7 @@ export default function App() {
         totalResults={totalResults}
         onImageClick={onImageClick}
         onLoadMore={onLoadMore}
+        showSpinner={showSpinner}
       ></ImageGallery>
       {showModal && (
         <Modal onClose={toggleModal}>

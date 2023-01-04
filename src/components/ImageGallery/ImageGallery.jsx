@@ -21,7 +21,6 @@ export function ImageGallery ({
   
   useEffect(() => {
     if (galleryRef.current) {
-      console.log(galleryRef.current)
           const { height: cardHeight } = galleryRef.current.getBoundingClientRect();
 
 window.scrollBy({

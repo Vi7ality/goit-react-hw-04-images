@@ -20,7 +20,7 @@ export function ImageGallery ({
   const galleryRef = useRef();
   
   useEffect(() => {
-    if (galleryRef.current) {
+    if (galleryRef.current && page > 1) {
           const { height: cardHeight } = galleryRef.current.getBoundingClientRect();
 
 window.scrollBy({
